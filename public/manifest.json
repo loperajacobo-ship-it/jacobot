@@ -1,0 +1,8 @@
+{
+  "name": "JACOBOT",
+  "short_name": "JACOBOT",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050508",
+  "theme_color": "#0a0b10"
+}
