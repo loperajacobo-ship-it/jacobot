@@ -31,34 +31,33 @@ app.post('/api/chat', async (req, res) => {
   try {
     const { prompt, image, mode } = req.body;
     const modePrompt = systemPrompts[mode] || systemPrompts.General;
+    const userText = `${modePrompt}\n\nUsuario: ${prompt || 'Hola'}`;
 
-    let textPrompt = `${modePrompt}\n\nUsuario: ${prompt || 'Hola'}`;
-    let contents = [textPrompt];
+    const contentsArr = [];
 
     if (image) {
       const matches = image.match(/^data:(.+);base64,(.+)$/);
       if (matches) {
-        contents = [
-          {
-            inlineData: {
-              mimeType: matches[1],
-              data: matches[2]
-            }
-          },
-          textPrompt
-        ];
+        contentsArr.push({
+          inlineData: {
+            mimeType: matches[1],
+            data: matches[2]
+          }
+        });
       }
     }
 
+    contentsArr.push(userText);
+
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: contents
+      contents: contentsArr
     });
 
     res.json({ reply: response.text });
   } catch (error) {
     console.error('Error en API:', error);
-    res.status(500).json({ error: 'Error procesando tu solicitud.' });
+    res.status(500).json({ error: 'Error procesando tu solicitud en el servidor.' });
   }
 });
 
