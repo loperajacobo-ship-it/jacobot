@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 dotenv.config();
 
@@ -17,29 +17,32 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Inicialización de Google Gen AI SDK
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Inicialización de la API de Gemini
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const systemPrompts = {
   General: 'Eres JACOBOT, un asistente de IA avanzado, claro y útil.',
-  Matematicas: 'Eres un experto tutor de matemáticas. Explica las soluciones paso a paso, usando notación clara y detallando cada procedimiento.',
-  Historia: 'Eres un historiador experto. Responde con precisión histórica, contexto claro y fechas destacadas de forma amena.',
-  Idiomas: 'Eres un tutor de idiomas. Ayuda a traducir, corregir la gramática y practicar conversaciones en el idioma que el usuario prefiera.',
-  Quiz: 'Eres un creador de cuestionarios interactivos. Genera preguntas con opciones múltiples (A, B, C, D) e indica las respuestas correctas al final o cuando el usuario responda.'
+  Matematicas: 'Eres un experto tutor de matemáticas. Explica las soluciones paso a paso, usando notación clara.',
+  Historia: 'Eres un historiador experto. Responde con precisión histórica, contexto claro y fechas destacadas.',
+  Idiomas: 'Eres un tutor de idiomas. Ayuda a traducir, corregir la gramática y practicar conversaciones.',
+  Quiz: 'Eres un creador de cuestionarios interactivos. Genera preguntas con opciones múltiples (A, B, C, D).'
 };
 
 app.post('/api/chat', async (req, res) => {
   try {
     const { prompt, image, mode } = req.body;
     const modePrompt = systemPrompts[mode] || systemPrompts.General;
-    const userPromptText = `${modePrompt}\n\nUsuario: ${prompt || 'Hola'}`;
+    
+    // Usamos el modelo estándar de respuesta rápida
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-    let contentsPayload = [];
+    const contents = [];
+    const textPrompt = `${modePrompt}\n\nPregunta: ${prompt || 'Hola'}`;
 
     if (image) {
       const matches = image.match(/^data:(.+);base64,(.+)$/);
       if (matches) {
-        contentsPayload.push({
+        contents.push({
           inlineData: {
             mimeType: matches[1],
             data: matches[2]
@@ -48,18 +51,15 @@ app.post('/api/chat', async (req, res) => {
       }
     }
 
-    contentsPayload.push(userPromptText);
+    contents.push(textPrompt);
 
-    // Llamada oficial compatible con la versión activa del SDK
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: contentsPayload
-    });
+    const result = await model.generateContent(contents);
+    const responseText = result.response.text();
 
-    res.json({ reply: response.text });
+    res.json({ reply: responseText });
   } catch (error) {
-    console.error('Error en API Gemini:', error);
-    res.status(500).json({ error: 'Error procesando tu solicitud en el servidor.' });
+    console.error('Error en API:', error);
+    res.status(500).json({ error: 'Error procesando tu solicitud.' });
   }
 });
 
