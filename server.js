@@ -19,11 +19,21 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+const systemPrompts = {
+  General: 'Eres JACOBOT, un asistente de IA avanzado, claro y útil.',
+  Matematicas: 'Eres un experto tutor de matemáticas. Explica las soluciones paso a paso, usando notación clara y detallando cada procedimiento.',
+  Historia: 'Eres un historiador experto. Responde con precisión histórica, contexto claro y fechas destacadas de forma amena.',
+  Idiomas: 'Eres un tutor de idiomas. Ayuda a traducir, corregir la gramática y practicar conversaciones en el idioma que el usuario prefiera.',
+  Quiz: 'Eres un creador de cuestionarios interactivos. Genera preguntas con opciones múltiples (A, B, C, D) e indica las respuestas correctas al final o cuando el usuario responda.'
+};
+
 app.post('/api/chat', async (req, res) => {
   try {
-    const { prompt, image } = req.body;
+    const { prompt, image, mode } = req.body;
     const contents = [];
 
+    const modePrompt = systemPrompts[mode] || systemPrompts.General;
+    
     if (image) {
       const matches = image.match(/^data:(.+);base64,(.+)$/);
       if (matches) {
@@ -36,9 +46,8 @@ app.post('/api/chat', async (req, res) => {
       }
     }
 
-    contents.push(prompt || 'Hola');
+    contents.push(`${modePrompt}\n\nUsuario: ${prompt || 'Hola'}`);
 
-    // Nombre de modelo compatible con la librería actual
     const response = await ai.models.generateContent({
       model: 'gemini-2.0-flash',
       contents: contents
@@ -56,5 +65,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`JACOBOT servidor activo en puerto ${PORT}`);
+  console.log(`Servidor JACOBOT corriendo en el puerto ${PORT}`);
 });
