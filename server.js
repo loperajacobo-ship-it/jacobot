@@ -30,26 +30,28 @@ const systemPrompts = {
 app.post('/api/chat', async (req, res) => {
   try {
     const { prompt, image, mode } = req.body;
-    const contents = [];
-
     const modePrompt = systemPrompts[mode] || systemPrompts.General;
-    
+
+    let textPrompt = `${modePrompt}\n\nUsuario: ${prompt || 'Hola'}`;
+    let contents = [textPrompt];
+
     if (image) {
       const matches = image.match(/^data:(.+);base64,(.+)$/);
       if (matches) {
-        contents.push({
-          inlineData: {
-            mimeType: matches[1],
-            data: matches[2]
-          }
-        });
+        contents = [
+          {
+            inlineData: {
+              mimeType: matches[1],
+              data: matches[2]
+            }
+          },
+          textPrompt
+        ];
       }
     }
 
-    contents.push(`${modePrompt}\n\nUsuario: ${prompt || 'Hola'}`);
-
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       contents: contents
     });
 
