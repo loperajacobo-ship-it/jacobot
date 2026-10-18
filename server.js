@@ -17,6 +17,7 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Inicialización de Google Gen AI SDK
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const systemPrompts = {
@@ -31,14 +32,14 @@ app.post('/api/chat', async (req, res) => {
   try {
     const { prompt, image, mode } = req.body;
     const modePrompt = systemPrompts[mode] || systemPrompts.General;
-    const userText = `${modePrompt}\n\nUsuario: ${prompt || 'Hola'}`;
+    const userPromptText = `${modePrompt}\n\nUsuario: ${prompt || 'Hola'}`;
 
-    const contentsArr = [];
+    let contentsPayload = [];
 
     if (image) {
       const matches = image.match(/^data:(.+);base64,(.+)$/);
       if (matches) {
-        contentsArr.push({
+        contentsPayload.push({
           inlineData: {
             mimeType: matches[1],
             data: matches[2]
@@ -47,16 +48,17 @@ app.post('/api/chat', async (req, res) => {
       }
     }
 
-    contentsArr.push(userText);
+    contentsPayload.push(userPromptText);
 
+    // Llamada oficial compatible con la versión activa del SDK
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: contentsArr
+      contents: contentsPayload
     });
 
     res.json({ reply: response.text });
   } catch (error) {
-    console.error('Error en API:', error);
+    console.error('Error en API Gemini:', error);
     res.status(500).json({ error: 'Error procesando tu solicitud en el servidor.' });
   }
 });
