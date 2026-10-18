@@ -1,1 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JACOBOT - Asistente IA</title>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        :root {
+            --bg-color: #05050a;
+            --panel-color: #0b0f19;
+            --accent-color: #00f0ff;
+            --text-color: #e0fbfc;
+            --border-color: #1e293b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        header { background-color: var(--panel-color); border-bottom: 1px solid var(--border-color); padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; }
+        h1 { font-size: 1.2rem; color: var(--accent-color); letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,240,255,0.4); }
+        #chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .message { max-width: 80%; padding: 12px 16px; border-radius: 12px; line-height: 1.5; word-wrap: break-word; }
+        .user { background-color: #1e293b; align-self: flex-end; border: 1px solid #334155; }
+        .bot { background-color: #0b0f19; align-self: flex-start; border: 1px solid var(--accent-color); box-shadow: 0 0 10px rgba(0,240,255,0.1); }
+        .input-area { background-color: var(--panel-color); border-top: 1px solid var(--border-color); padding: 15px; display: flex; gap: 10px; align-items: center; }
+        input[type="text"] { flex: 1; background-color: #05050a; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; color: var(--text-color); outline: none; font-size: 1rem; }
+        input[type="text"]:focus { border-color: var(--accent-color); box-shadow: 0 0 5px rgba(0,240,255,0.3); }
+        button { background-color: var(--accent-color); color: #000; border: none; border-radius: 8px; padding: 10px 20px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { opacity: 0.9; box-shadow: 0 0 10px var(--accent-color); }
+        #image-preview { max-height: 50px; border-radius: 4px; display: none; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>JACOBOT // SYSTEM ACTIVE</h1>
+    </header>
+    <div id="chat-container">
+        <div class="message bot">Hola Jacobo. Soy JACOBOT, tu sistema de IA conectado con Gemini. ¿En qué te ayudo hoy?</div>
+    </div>
+    <div class="input-area">
+        <input type="file" id="image-input" accept="image/*" style="display:none">
+        <button onclick="document.getElementById('image-input').click()">📷</button>
+        <img id="image-preview" alt="Preview">
+        <input type="text" id="prompt-input" placeholder="Escribe un mensaje..." onkeypress="if(event.key === 'Enter') sendMessage()">
+        <button onclick="sendMessage()">Enviar</button>
+    </div>
+    <script>
+        let base64Image = null;
+        document.getElementById('image-input').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (uploadEvent) => {
+                    base64Image = uploadEvent.target.result;
+                    const preview = document.getElementById('image-preview');
+                    preview.src = base64Image;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
+        async function sendMessage() {
+            const input = document.getElementById('prompt-input');
+            const container = document.getElementById('chat-container');
+            const prompt = input.value.trim();
+            if (!prompt && !base64Image) return;
+
+            let userHtml = `<div class="message user">`;
+            if (base64Image) userHtml += `<img src="${base64Image}" style="max-width:150px; display:block; margin-bottom:5px; border-radius:4px;">`;
+            userHtml += `${prompt || 'Imagen enviada'}</div>`;
+            container.innerHTML += userHtml;
+
+            const currentPrompt = prompt;
+            const currentImage = base64Image;
+
+            input.value = '';
+            base64Image = null;
+            document.getElementById('image-preview').style.display = 'none';
+            container.scrollTop = container.scrollHeight;
+
+            const loadingId = 'loading-' + Date.now();
+            container.innerHTML += `<div class="message bot" id="${loadingId}">Procesando...</div>`;
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: currentPrompt, image: currentImage })
+                });
+                const data = await res.json();
+                document.getElementById(loadingId).remove();
+                container.innerHTML += `<div class="message bot">${data.reply || data.error}</div>`;
+            } catch (err) {
+                document.getElementById(loadingId).remove();
+                container.innerHTML += `<div class="message bot">Error de conexión con el servidor.</div>`;
+            }
+            container.scrollTop = container.scrollHeight;
+        }
+    </script>
+</body>
+</html>
