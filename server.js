@@ -33,32 +33,35 @@ app.post('/api/chat', async (req, res) => {
     const { prompt, image, mode } = req.body;
     const modePrompt = systemPrompts[mode] || systemPrompts.General;
     
-    // Usamos el modelo estándar de respuesta rápida
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const contents = [];
-    const textPrompt = `${modePrompt}\n\nPregunta: ${prompt || 'Hola'}`;
 
-    if (image) {
-      const matches = image.match(/^data:(.+);base64,(.+)$/);
-      if (matches) {
+    // Verificación segura de la imagen
+    if (image && typeof image === 'string' && image.includes('base64,')) {
+      const parts = image.split('base64,');
+      if (parts.length === 2) {
+        const mimeMatch = parts[0].match(/data:(.*);/);
+        const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+        
         contents.push({
           inlineData: {
-            mimeType: matches[1],
-            data: matches[2]
+            mimeType: mimeType,
+            data: parts[1]
           }
         });
       }
     }
 
-    contents.push(textPrompt);
+    const userText = `${modePrompt}\n\nUsuario: ${prompt || 'Hola'}`;
+    contents.push(userText);
 
     const result = await model.generateContent(contents);
     const responseText = result.response.text();
 
     res.json({ reply: responseText });
   } catch (error) {
-    console.error('Error en API:', error);
+    console.error('Error detallado en API:', error);
     res.status(500).json({ error: 'Error procesando tu solicitud.' });
   }
 });
