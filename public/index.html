@@ -40,6 +40,11 @@
         .menu-item:hover { background: var(--card-bg); border-color: var(--border-color); }
         .menu-item.active { background: #1e1b4b; border-color: var(--primary); color: #fff; }
 
+        .history-list { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 15px; max-height: 200px; overflow-y: auto; }
+        .history-item { font-size: 0.85rem; color: var(--text-muted); padding: 8px; border-radius: 6px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .history-item:hover { background: var(--card-bg); color: var(--text-main); }
+        .history-icon { color: var(--primary); font-size: 0.9rem; }
+
         .clear-btn { background: transparent; color: #ef4444; border: 1px solid #3f1d1d; padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; margin-top: auto; }
         .clear-btn:hover { background: #2c0f0f; }
 
@@ -74,7 +79,7 @@
 </head>
 <body>
 
-    <!-- Panel Lateral con Logo y Opciones -->
+    <!-- Panel Lateral con Logo, Opciones e Historial -->
     <sidebar>
         <div class="sidebar-header">
             <div class="logo-icon">🤖</div>
@@ -95,10 +100,17 @@
             <button class="menu-item" onclick="setMode('Quiz', '🧠 Generador de Quiz', 'Modo Quiz activo: Dime un tema y crearemos un test interactivo.')">🧠 Modo Quiz</button>
         </div>
 
+        <div class="section-title">Historial Reciente</div>
+        <div class="history-list">
+            <div class="history-item"><span class="history-icon">💬</span> Resumen de la Revolución Industrial</div>
+            <div class="history-item"><span class="history-icon">📐</span> Ecuación cuadrática compleja</div>
+            <div class="history-item"><span class="history-icon">🗣️</span> Práctica de verbos en Francés</div>
+        </div>
+
         <button class="clear-btn" onclick="clearChat()">🗑️ Borrar Chat</button>
     </sidebar>
 
-    <!-- Área Principal -->
+    <!-- Área Principal de Chat -->
     <div class="main-container">
         <header>
             <div class="header-title" id="current-mode-title">💬 Chat General</div>
@@ -113,8 +125,10 @@
             <div class="input-box">
                 <input type="file" id="image-input" accept="image/*" style="display:none">
                 <button class="action-btn" onclick="document.getElementById('image-input').click()" title="Adjuntar imagen">📎</button>
+                <button class="action-btn" title="Adjuntar archivo">📄</button>
                 <img id="image-preview" alt="Preview">
-                <input type="text" id="prompt-input" placeholder="Escribe tu mensaje..." onkeypress="if(event.key === 'Enter') sendMessage()">
+                <input type="text" id="prompt-input" placeholder="Escribe tu mensaje o comando para JACOBOT..." onkeypress="if(event.key === 'Enter') sendMessage()">
+                <button class="action-btn" title="Usar micrófono">🎤</button>
                 <button class="send-btn" onclick="sendMessage()">➔</button>
             </div>
         </div>
@@ -145,7 +159,7 @@
             document.getElementById('current-mode-title').innerText = title;
             
             const container = document.getElementById('chat-container');
-            container.innerHTML += `<div class="message bot">${intro}</div>`;
+            container.innerHTML += `<div class="message bot"><b>[JACOBOT AI]</b><br>${intro}</div>`;
             container.scrollTop = container.scrollHeight;
         }
 
