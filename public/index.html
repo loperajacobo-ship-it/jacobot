@@ -3,69 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JACOBOT - Asistente IA</title>
+    <title>JACOBOT AI</title>
     <link rel="manifest" href="/manifest.json">
     <style>
         :root {
-            --bg-color: #05050a;
-            --panel-color: #0b0f19;
-            --accent-color: #00f0ff;
-            --text-color: #e0fbfc;
-            --border-color: #1e293b;
+            --bg-dark: #0b0c10;
+            --sidebar-bg: #111218;
+            --card-bg: #181922;
+            --primary: #635bff;
+            --primary-hover: #7a73ff;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #232533;
+            --user-msg: #312e81;
+            --bot-msg: #181922;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); display: flex; height: 100vh; overflow: hidden; }
-        
-        sidebar { width: 240px; background-color: var(--panel-color); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 20px; gap: 15px; }
-        .logo-area { font-size: 1.1rem; color: var(--accent-color); font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,240,255,0.4); }
-        .menu-btn { background: #111827; color: var(--text-color); border: 1px solid var(--border-color); padding: 10px 15px; border-radius: 8px; cursor: pointer; text-align: left; transition: 0.2s; font-size: 0.9rem; }
-        .menu-btn:hover { border-color: var(--accent-color); background: #1f2937; }
 
-        .main-chat { flex: 1; display: flex; flex-direction: column; height: 100vh; }
-        header { background-color: var(--panel-color); border-bottom: 1px solid var(--border-color); padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; }
-        #chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .message { max-width: 75%; padding: 12px 16px; border-radius: 12px; line-height: 1.5; word-wrap: break-word; }
-        .user { background-color: #1e293b; align-self: flex-end; border: 1px solid #334155; }
-        .bot { background-color: var(--panel-color); align-self: flex-start; border: 1px solid var(--accent-color); box-shadow: 0 0 10px rgba(0,240,255,0.1); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* Panel Lateral (Sidebar) */
+        sidebar { width: 280px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 16px; gap: 15px; }
+        .sidebar-header { display: flex; align-items: center; justify-content: space-between; font-weight: bold; font-size: 1.1rem; color: #fff; margin-bottom: 5px; }
         
-        .input-area { background-color: var(--panel-color); border-top: 1px solid var(--border-color); padding: 15px; display: flex; gap: 10px; align-items: center; position: relative; }
-        input[type="text"] { flex: 1; background-color: #05050a; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; color: var(--text-color); outline: none; font-size: 1rem; }
-        input[type="text"]:focus { border-color: var(--accent-color); box-shadow: 0 0 5px rgba(0,240,255,0.3); }
-        button.send-btn { background-color: var(--accent-color); color: #000; border: none; border-radius: 8px; padding: 12px 20px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button.send-btn:hover { opacity: 0.9; box-shadow: 0 0 10px var(--accent-color); }
-        .icon-btn { background: #111827; color: var(--accent-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; cursor: pointer; font-size: 1rem; }
+        .new-chat-btn { background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .new-chat-btn:hover { background: var(--primary-hover); }
+
+        .section-title { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px; margin-top: 10px; }
+
+        .menu-list { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1; }
+        .menu-item { background: transparent; color: var(--text-main); border: 1px solid transparent; padding: 10px 12px; border-radius: 8px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; transition: 0.2s; }
+        .menu-item:hover { background: var(--card-bg); border-color: var(--border-color); }
+        .menu-item.active { background: #1e1b4b; border-color: var(--primary); color: #fff; }
+
+        .clear-btn { background: transparent; color: #ef4444; border: 1px solid #3f1d1d; padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; margin-top: auto; }
+        .clear-btn:hover { background: #2c0f0f; }
+
+        /* Área Principal de Chat */
+        .main-container { flex: 1; display: flex; flex-direction: column; height: 100vh; position: relative; }
         
-        #image-preview { position: absolute; bottom: 75px; left: 15px; max-height: 60px; border-radius: 6px; border: 1px solid var(--accent-color); display: none; background: #000; }
+        header { background: var(--sidebar-bg); border-bottom: 1px solid var(--border-color); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+        .header-title { font-weight: 600; font-size: 1rem; color: #fff; }
+        .mode-badge { background: #1e1b4b; color: #a5b4fc; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; border: 1px solid var(--primary); }
+
+        #chat-container { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+        
+        .message { max-width: 80%; padding: 14px 18px; border-radius: 12px; line-height: 1.6; font-size: 0.95rem; word-wrap: break-word; white-space: pre-wrap; }
+        .user { background-color: var(--user-msg); align-self: flex-end; color: #e0e7ff; border-radius: 12px 12px 2px 12px; }
+        .bot { background-color: var(--bot-msg); align-self: flex-start; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 12px 12px 12px 2px; }
+
+        /* Barra de Entrada de Mensaje */
+        .input-wrapper { padding: 16px 24px; background: var(--sidebar-bg); border-top: 1px solid var(--border-color); }
+        .input-box { background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 12px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; }
+        .input-box:focus-within { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.2); }
+
+        input[type="text"] { flex: 1; background: transparent; border: none; color: var(--text-main); font-size: 0.95rem; outline: none; padding: 6px; }
+        
+        .action-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: 0.2s; }
+        .action-btn:hover { color: var(--text-main); background: var(--card-bg); }
+        
+        .send-btn { background: var(--primary); color: #fff; border: none; border-radius: 8px; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .send-btn:hover { background: var(--primary-hover); }
+
+        #image-preview { max-height: 50px; border-radius: 6px; display: none; border: 1px solid var(--primary); }
     </style>
 </head>
 <body>
+
+    <!-- Panel Lateral -->
     <sidebar>
-        <div class="logo-area">⚡ JACOBOT</div>
-        <button class="menu-btn" onclick="clearChat()">🗑️ Limpiar Chat</button>
-        <button class="menu-btn" onclick="alert('IA Activa: Gemini 2.0')">⚙️ Estado Sistema</button>
+        <div class="sidebar-header">
+            <span>⚡ JACOBOT AI</span>
+        </div>
+
+        <button class="new-chat-btn" onclick="startNewChat()">✏️ Nuevo Chat</button>
+
+        <div class="section-title">Modos de Aprendizaje</div>
+        <div class="menu-list">
+            <button class="menu-item active" onclick="setMode('General', '💬 Chat General', 'Modo General')">💬 Chat General</button>
+            <button class="menu-item" onclick="setMode('Matematicas', '📐 Matemáticas paso a paso', 'Pídemelo: Resolveré ecuaciones, explicaré fórmulas y ejercicios paso a paso.')">📐 Matemáticas</button>
+            <button class="menu-item" onclick="setMode('Historia', '📜 Historia Universal', 'Pídemelo: Explicaré eventos históricos, fechas clave y contexto mundial.')">📜 Historia</button>
+            <button class="menu-item" onclick="setMode('Idiomas', '🗣️ Tutor de Idiomas', 'Pídemelo: Practiquemos conversaciones, gramática o traducciones.')">🗣️ Idiomas</button>
+            <button class="menu-item" onclick="setMode('Quiz', '🧠 Generador de Quiz', 'Pídemelo: Dime un tema y crearemos un test interactivo con preguntas y respuestas.')">🧠 Modo Quiz</button>
+        </div>
+
+        <button class="clear-btn" onclick="clearChat()">🗑️ Borrar Chat</button>
     </sidebar>
 
-    <div class="main-chat">
+    <!-- Área Principal -->
+    <div class="main-container">
         <header>
-            <span style="color: var(--accent-color); font-weight: 600;">SISTEMA ACTIVO</span>
-            <span style="font-size: 0.85rem; color: #94a3b8;">Gemini Core</span>
+            <div class="header-title" id="current-mode-title">💬 Chat General</div>
+            <div class="mode-badge" id="mode-badge">Modo Activo</div>
         </header>
 
         <div id="chat-container">
-            <div class="message bot">Hola Jacobo. Soy JACOBOT. ¿Qué consulta o prueba haremos hoy?</div>
+            <div class="message bot" id="welcome-msg">Hola Jacobo. Soy JACOBOT AI. Selecciona un modo en el menú lateral o escribe cualquier consulta.</div>
         </div>
 
-        <div class="input-area">
-            <input type="file" id="image-input" accept="image/*" style="display:none">
-            <button class="icon-btn" onclick="document.getElementById('image-input').click()" title="Adjuntar Imagen">📷</button>
-            <img id="image-preview" alt="Preview">
-            <input type="text" id="prompt-input" placeholder="Escribe un mensaje..." onkeypress="if(event.key === 'Enter') sendMessage()">
-            <button class="send-btn" onclick="sendMessage()">Enviar</button>
+        <div class="input-wrapper">
+            <div class="input-box">
+                <input type="file" id="image-input" accept="image/*" style="display:none">
+                <button class="action-btn" onclick="document.getElementById('image-input').click()" title="Adjuntar archivo o imagen">📎</button>
+                <img id="image-preview" alt="Preview">
+                <input type="text" id="prompt-input" placeholder="Escribe tu mensaje o pregunta..." onkeypress="if(event.key === 'Enter') sendMessage()">
+                <button class="send-btn" onclick="sendMessage()">➔</button>
+            </div>
         </div>
     </div>
 
     <script>
+        let currentMode = 'General';
         let base64Image = null;
+
         document.getElementById('image-input').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -80,8 +130,23 @@
             }
         });
 
+        function setMode(modeKey, title, intro) {
+            currentMode = modeKey;
+            document.querySelectorAll('.menu-item').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.getElementById('current-mode-title').innerText = title;
+            
+            const container = document.getElementById('chat-container');
+            container.innerHTML += `<div class="message bot"><b>[Modo cambiado a ${modeKey}]</b><br>${intro}</div>`;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function startNewChat() {
+            document.getElementById('chat-container').innerHTML = `<div class="message bot">Nuevo chat iniciado en modo <b>${currentMode}</b>. ¿En qué te ayudo?</div>`;
+        }
+
         function clearChat() {
-            document.getElementById('chat-container').innerHTML = `<div class="message bot">Chat reiniciado. ¿En qué te ayudo?</div>`;
+            document.getElementById('chat-container').innerHTML = `<div class="message bot">Chat borrado.</div>`;
         }
 
         async function sendMessage() {
@@ -91,12 +156,12 @@
             if (!prompt && !base64Image) return;
 
             let userHtml = `<div class="message user">`;
-            if (base64Image) userHtml += `<img src="${base64Image}" style="max-width:150px; display:block; margin-bottom:5px; border-radius:4px;">`;
+            if (base64Image) userHtml += `<img src="${base64Image}" style="max-width:200px; display:block; margin-bottom:8px; border-radius:6px;">`;
             userHtml += `${prompt || 'Imagen adjunta'}</div>`;
             container.innerHTML += userHtml;
 
             const currentPrompt = prompt;
-            const currentImage = base64Image;
+            const currentImg = base64Image;
 
             input.value = '';
             base64Image = null;
@@ -104,20 +169,21 @@
             container.scrollTop = container.scrollHeight;
 
             const loadingId = 'loading-' + Date.now();
-            container.innerHTML += `<div class="message bot" id="${loadingId}">Pensando...</div>`;
+            container.innerHTML += `<div class="message bot" id="${loadingId}">JACOBOT respondiendo...</div>`;
+            container.scrollTop = container.scrollHeight;
 
             try {
                 const res = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: currentPrompt, image: currentImage })
+                    body: JSON.stringify({ prompt: currentPrompt, image: currentImg, mode: currentMode })
                 });
                 const data = await res.json();
                 document.getElementById(loadingId).remove();
                 container.innerHTML += `<div class="message bot">${data.reply || data.error}</div>`;
             } catch (err) {
                 document.getElementById(loadingId).remove();
-                container.innerHTML += `<div class="message bot">Error de conexión con el servidor.</div>`;
+                container.innerHTML += `<div class="message bot">Error al conectar con el servidor.</div>`;
             }
             container.scrollTop = container.scrollHeight;
         }
