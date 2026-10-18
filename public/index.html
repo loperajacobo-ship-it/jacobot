@@ -24,8 +24,12 @@
 
         /* Panel Lateral (Sidebar) */
         sidebar { width: 280px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 16px; gap: 15px; }
-        .sidebar-header { display: flex; align-items: center; justify-content: space-between; font-weight: bold; font-size: 1.1rem; color: #fff; margin-bottom: 5px; }
         
+        .sidebar-header { display: flex; align-items: center; gap: 12px; padding: 6px 4px; margin-bottom: 5px; }
+        .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #635bff, #00f0ff); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 0 12px rgba(99, 91, 255, 0.4); }
+        .logo-text { font-weight: 800; font-size: 1.1rem; color: #fff; letter-spacing: 0.5px; }
+        .logo-sub { font-size: 0.7rem; color: var(--text-muted); display: block; letter-spacing: 1px; }
+
         .new-chat-btn { background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
         .new-chat-btn:hover { background: var(--primary-hover); }
 
@@ -70,21 +74,25 @@
 </head>
 <body>
 
-    <!-- Panel Lateral -->
+    <!-- Panel Lateral con Logo y Opciones -->
     <sidebar>
         <div class="sidebar-header">
-            <span>⚡ JACOBOT AI</span>
+            <div class="logo-icon">🤖</div>
+            <div>
+                <span class="logo-text">JACOBOT AI</span>
+                <span class="logo-sub">GEMINI CORE</span>
+            </div>
         </div>
 
         <button class="new-chat-btn" onclick="startNewChat()">✏️ Nuevo Chat</button>
 
-        <div class="section-title">Modos de Aprendizaje</div>
+        <div class="section-title">Modos de Estudio</div>
         <div class="menu-list">
-            <button class="menu-item active" onclick="setMode('General', '💬 Chat General', 'Modo General')">💬 Chat General</button>
-            <button class="menu-item" onclick="setMode('Matematicas', '📐 Matemáticas paso a paso', 'Pídemelo: Resolveré ecuaciones, explicaré fórmulas y ejercicios paso a paso.')">📐 Matemáticas</button>
-            <button class="menu-item" onclick="setMode('Historia', '📜 Historia Universal', 'Pídemelo: Explicaré eventos históricos, fechas clave y contexto mundial.')">📜 Historia</button>
-            <button class="menu-item" onclick="setMode('Idiomas', '🗣️ Tutor de Idiomas', 'Pídemelo: Practiquemos conversaciones, gramática o traducciones.')">🗣️ Idiomas</button>
-            <button class="menu-item" onclick="setMode('Quiz', '🧠 Generador de Quiz', 'Pídemelo: Dime un tema y crearemos un test interactivo con preguntas y respuestas.')">🧠 Modo Quiz</button>
+            <button class="menu-item active" onclick="setMode('General', '💬 Chat General', 'Modo General activo.')">💬 Chat General</button>
+            <button class="menu-item" onclick="setMode('Matematicas', '📐 Matemáticas paso a paso', 'Modo Matemáticas activo: Resolveremos ecuaciones y fórmulas paso a paso.')">📐 Matemáticas</button>
+            <button class="menu-item" onclick="setMode('Historia', '📜 Historia Universal', 'Modo Historia activo: Explicaremos eventos, fechas y contexto mundial.')">📜 Historia</button>
+            <button class="menu-item" onclick="setMode('Idiomas', '🗣️ Tutor de Idiomas', 'Modo Idiomas activo: Practiquemos gramática, traducciones o conversación.')">🗣️ Idiomas</button>
+            <button class="menu-item" onclick="setMode('Quiz', '🧠 Generador de Quiz', 'Modo Quiz activo: Dime un tema y crearemos un test interactivo.')">🧠 Modo Quiz</button>
         </div>
 
         <button class="clear-btn" onclick="clearChat()">🗑️ Borrar Chat</button>
@@ -94,19 +102,19 @@
     <div class="main-container">
         <header>
             <div class="header-title" id="current-mode-title">💬 Chat General</div>
-            <div class="mode-badge" id="mode-badge">Modo Activo</div>
+            <div class="mode-badge" id="mode-badge">En línea</div>
         </header>
 
         <div id="chat-container">
-            <div class="message bot" id="welcome-msg">Hola Jacobo. Soy JACOBOT AI. Selecciona un modo en el menú lateral o escribe cualquier consulta.</div>
+            <div class="message bot" id="welcome-msg">Hola Jacobo. Soy JACOBOT AI con Gemini. Selecciona un modo de estudio en el menú izquierdo o escribe cualquier consulta.</div>
         </div>
 
         <div class="input-wrapper">
             <div class="input-box">
                 <input type="file" id="image-input" accept="image/*" style="display:none">
-                <button class="action-btn" onclick="document.getElementById('image-input').click()" title="Adjuntar archivo o imagen">📎</button>
+                <button class="action-btn" onclick="document.getElementById('image-input').click()" title="Adjuntar imagen">📎</button>
                 <img id="image-preview" alt="Preview">
-                <input type="text" id="prompt-input" placeholder="Escribe tu mensaje o pregunta..." onkeypress="if(event.key === 'Enter') sendMessage()">
+                <input type="text" id="prompt-input" placeholder="Escribe tu mensaje..." onkeypress="if(event.key === 'Enter') sendMessage()">
                 <button class="send-btn" onclick="sendMessage()">➔</button>
             </div>
         </div>
@@ -137,7 +145,7 @@
             document.getElementById('current-mode-title').innerText = title;
             
             const container = document.getElementById('chat-container');
-            container.innerHTML += `<div class="message bot"><b>[Modo cambiado a ${modeKey}]</b><br>${intro}</div>`;
+            container.innerHTML += `<div class="message bot">${intro}</div>`;
             container.scrollTop = container.scrollHeight;
         }
 
